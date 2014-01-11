@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fxpProperties abbreviated="false" authoringTool="Flex Builder" parentProject="faacd0f7-2916-41ec-a24c-5943b898eac3" projectUUID="d87ea695-c632-48da-8a2c-f19d64524a30" pureCatalystProject="false" sdkVersion="4.11.0" uuid="9482483d-43f2-4c56-bb15-3a4b5cad69c9" version="15">
+  <projects>
+    <project filename="ObjectTranslator.fxpl" position="1" projectUUID="db6da112-d315-4626-9772-1b6de9d35903" uuid="9482483d-43f2-4c56-bb15-3a4b5cad69c9"/>
+    <project filename="as3corelib.fxpl" position="2" projectUUID="73dd3de9-0c44-499d-be51-35a871fb5b9a" uuid="9482483d-43f2-4c56-bb15-3a4b5cad69c9"/>
+    <project filename="AlivePDF.fxpl" position="3" projectUUID="dff273dc-3885-4196-a036-b0ab105c7ac7" uuid="9482483d-43f2-4c56-bb15-3a4b5cad69c9"/>
+  </projects>
+  <src/>
+  <swc>
+    <linked location="sdkPlaceHolder" path="sdkPlaceHolder" position="0" uuid="9482483d-43f2-4c56-bb15-3a4b5cad69c9"/>
+  </swc>
+  <misc/>
+  <theme/>
+  <mxmlFormattingPrefs groupAttributesByState="true" maxLineWidth="100" mxmlAlignAttributes="true" mxmlAttributeOrder="id,userLabel,includeIn,excludeFrom,visible,x,y,z,left,right,top,bottom,width,height,minWidth,minHeight,maxWidth,maxHeight,label" mxmlKeepAttributeValuesOrganized="true"/>
+</fxpProperties>
