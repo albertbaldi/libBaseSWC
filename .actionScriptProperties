@@ -20,6 +20,7 @@
       <libraryPathEntry kind="3" linkType="1" path="/libAlivePDF/bin/libAlivePDF.swc" useDefaultLinkType="false"/>
       <libraryPathEntry kind="3" linkType="1" path="/libObjectTranslator/bin/libObjectTranslator.swc" useDefaultLinkType="false"/>
       <libraryPathEntry kind="3" linkType="1" path="/libNativeAlertAir/bin/libNativeAlertAir.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="1" path="/libAS3Utils/bin/libAS3Utils.swc" useDefaultLinkType="false"/>
     </libraryPath>
     <sourceAttachmentPath/>
   </compiler>

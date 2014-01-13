@@ -49,7 +49,6 @@ package controllers
 		private var _conn:SQLConnection;
 		private var _stmt:SQLStatement;
 		private var _classVO:Class;
-		private var _charParam:String = ':';
 
 		/**
 		 * Formata o valor de uma coluna a partir do nome do campo
@@ -90,22 +89,6 @@ package controllers
 			var className:String = 'valueObjects.' + firstCharToUpper(tabela) + 'VO';
 			var cls:Class = getDefinitionByName(className) as Class;
 			return new cls;
-		}
-
-		/**
-		 * Caracter para identificação do item de parâmetro
-		 * O valor default é <code>:</code>
-		 * @return Identificador de parâmetro para o SQL
-		 *
-		 */
-		public function get charParam():String
-		{
-			return this._charParam;
-		}
-
-		public function set charParam(value:String):void
-		{
-			this._charParam = value;
 		}
 
 		/**
@@ -218,7 +201,7 @@ package controllers
 					order.forEach(myFunction, order);
 					sql = sql.substring(0, sql.lastIndexOf(','));
 				}
-				trace(sql);
+
 				stmt.text = sql;
 				stmt.execute();
 				return new ArrayCollection(stmt.getResult().data);
@@ -229,6 +212,7 @@ package controllers
 			}
 			finally
 			{
+				trace(sql);
 				stmt.clearParameters();
 			}
 
@@ -244,13 +228,17 @@ package controllers
 		 */
 		public function getRow(classVO:Class, id:int):*
 		{
+			var sql:String = '';
+
 			try
 			{
 				var arrayFields:Array = [];
 				getFields(objectVO, arrayFields);
 
-				stmt.text = 'SELECT ' + arrayFields.join(',') + ' FROM ' + tabela + ' WHERE id = ' + charParam + 'id';
-				stmt.parameters[charParam + 'id'] = id;
+				sql = 'SELECT ' + arrayFields.join(',') + ' FROM ' + tabela + ' WHERE id=:id';
+
+				stmt.text = sql;
+				stmt.parameters[':id'] = id;
 				stmt.execute();
 
 				var list:ArrayCollection = new ArrayCollection(stmt.getResult().data);
@@ -266,6 +254,7 @@ package controllers
 			}
 			finally
 			{
+				trace(sql);
 				stmt.clearParameters();
 			}
 
@@ -310,11 +299,10 @@ package controllers
 					else
 					{
 						isInsert = false;
-						sql = 'UPDATE ' + tabela + ' SET ' + arrayPairs.join(',') + ' WHERE ' + 'id = :id';
-						stmt.parameters[charParam + 'id'] = entity.id;
+						sql = 'UPDATE ' + tabela + ' SET ' + arrayPairs.join(',') + ' WHERE ' + 'id=:id';
+						stmt.parameters[':id'] = entity.id;
 					}
 
-					trace(sql);
 					stmt.text = sql;
 					stmt.execute();
 
@@ -329,6 +317,7 @@ package controllers
 				}
 				finally
 				{
+					trace(sql);
 					stmt.clearParameters();
 				}
 			}
@@ -343,15 +332,23 @@ package controllers
 		 */
 		public function deleteRow(id:int):void
 		{
+			var sql:String = '';
+
 			try
 			{
-				stmt.text = 'DELETE FROM ' + tabela + ' WHERE id=:id';
-				stmt.parameters[charParam + 'id'] = id;
+				sql = 'DELETE FROM ' + tabela + ' WHERE id=:id';
+				stmt.text = sql;
+				stmt.parameters[':id'] = id;
 				stmt.execute();
 			}
 			catch (error:Error)
 			{
 				mostrarMensagem('Erro ao excluir o registro\n' + error.message, 'Erro');
+			}
+			finally
+			{
+				trace(sql);
+				stmt.clearParameters();
 			}
 		}
 
@@ -395,6 +392,34 @@ package controllers
 			return df.format(dt);
 		}
 
+		public function dateAdd(datepart:String = "", number:Number = 0, date:Date = null):Date
+		{
+			if (date == null)
+				date = new Date();
+
+			var returnDate:Date = new Date(date.time);
+			;
+
+			switch (datepart.toLowerCase())
+			{
+				case "fullyear":
+				case "month":
+				case "date":
+				case "hours":
+				case "minutes":
+				case "seconds":
+				case "milliseconds":
+				{
+					returnDate[datepart] += number;
+					break;
+				}
+				default:
+					/* Unknown date part, do nothing. */
+					break;
+			}
+			return returnDate;
+		}
+
 		/**
 		 * Recupera os campos de um objeto, convertendo-os em um <code>Array</code>
 		 * @param entity Objeto a ser convertido
@@ -426,13 +451,13 @@ package controllers
 						arrayFields[index] = (isClass ? 'id' + firstCharToUpper(element) : element);
 
 					if (arrayParams != null)
-						arrayParams[index] = charParam + (isClass ? 'id' + firstCharToUpper(element) : element);
+						arrayParams[index] = ':' + (isClass ? 'id' + firstCharToUpper(element) : element);
 
 					if (arrayPairs != null)
-						arrayPairs[index] = element + ' = ' + charParam + element;
+						arrayPairs[index] = element + ' = ' + ':' + element;
 
 					if (stmt != null)
-						stmt.parameters[charParam + (isClass ? 'id' + element : element)] = (isClass ? entity[element]['id'] : entity[element]);
+						stmt.parameters[':' + (isClass ? 'id' + element : element)] = (isClass ? entity[element]['id'] : entity[element]);
 				}
 			};
 
