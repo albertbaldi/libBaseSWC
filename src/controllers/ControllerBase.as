@@ -37,6 +37,7 @@ package controllers
 	import components.ExtendedNativeWindow;
 
 	import valueObjects.AppInfoVO;
+	import valueObjects.OrderVO;
 
 	/**
 	 *
@@ -201,6 +202,23 @@ package controllers
 				if (!isNullOrEmpty(where))
 					sql += ' WHERE ' + where.join(' AND ');
 
+				if (!isNullOrEmpty(order))
+				{
+					sql += ' ORDER BY ';
+					var myFunction:Function = function(element:*, index:int, arr:Array):void
+					{
+						try
+						{
+							var itm:OrderVO = element as OrderVO;
+							sql += itm.campo + ' ' + itm.ordem + ',';
+						}
+						catch (error:Error) {}
+					};
+
+					order.forEach(myFunction, order);
+					sql = sql.substring(0, sql.lastIndexOf(','));
+				}
+				trace(sql);
 				stmt.text = sql;
 				stmt.execute();
 				return new ArrayCollection(stmt.getResult().data);
@@ -361,14 +379,16 @@ package controllers
 		}
 
 		/**
+		 * Converte uma data ou a data do sistema em um formato específico
+		 * @param formato Formato para retorno da data
+		 * @param date Data a ser convertida
+		 * @return texto com a data formatada
 		 *
-		 * @param formato
-		 * @return
 		 */
-		public function getDateTime(formato:String = null):String
+		public function getDateTime(formato:String = null, date:Date = null):String
 		{
 			var df:DateFormatter = new DateFormatter;
-			var dt:Date = new Date;
+			var dt:Date = (date ? date : new Date);
 
 			df.formatString = (formato ? formato : 'DD/MM/YYYY HH:NN:SS');
 

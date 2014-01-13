@@ -4,6 +4,7 @@
     <classEntry path="components.TextInputUpper"/>
     <classEntry path="valueObjects.AppInfoVO"/>
     <classEntry path="components.ExtendedNativeWindow"/>
+    <classEntry path="valueObjects.OrderVO"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
