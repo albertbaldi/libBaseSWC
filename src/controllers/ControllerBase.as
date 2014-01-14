@@ -38,6 +38,7 @@ package controllers
 
 	import valueObjects.AppInfoVO;
 	import valueObjects.OrderVO;
+	import valueObjects.WhereVO;
 
 	/**
 	 *
@@ -49,6 +50,12 @@ package controllers
 		private var _conn:SQLConnection;
 		private var _stmt:SQLStatement;
 		private var _classVO:Class;
+
+		public static const INPUT_FORMAT_HORA:String = "HH:NN";
+		public static const INPUT_FORMAT_HORA_COMPLETA:String = "HH:NN:SS";
+		public static const INPUT_FORMAT_DATA:String = "DD/MM/YY";
+		public static const INPUT_FORMAT_DATA_HORA:String = "DD/MM/YYYY HH:NN:SS";
+		public static const INPUT_FORMAT_DATA_US:String = "YYYY-MM-DD";
 
 		/**
 		 * Formata o valor de uma coluna a partir do nome do campo
@@ -166,8 +173,8 @@ package controllers
 
 		/**
 		 * Consulta os registros no banco de dados
-		 * @param where condições para a consulta
-		 * @param order condições para a ordenação
+		 * @param where Lista de <code>WhereVO</code> como condições para a consulta
+		 * @param order Lista de <code>OrderVO</code> como condições para a ordenação
 		 * @return Lista com os registros
 		 *
 		 */
@@ -175,31 +182,49 @@ package controllers
 		{
 			try
 			{
+				var myFunction:Function = null;
 				var sql:String = '';
 				var arrayFields:Array = [];
 
-				getFields(objectVO, arrayFields);
+				getFields(objectVO, arrayFields, null, null, null, true);
 
 				sql = 'SELECT ' + arrayFields.join(',') + ' FROM ' + tabela;
 
 				if (!isNullOrEmpty(where))
-					sql += ' WHERE ' + where.join(' AND ');
+				{
+					sql += ' WHERE ';
+					myFunction = function(element:*, index:int, arr:Array):void
+					{
+						try
+						{
+							var itm:WhereVO = element as WhereVO;
+							sql += itm.formattedKey + '=:' + itm.key;
+
+							if (where.indexOf(itm) < where.length - 1)
+								sql += ' AND ';
+
+							stmt.parameters[':' + itm.key] = itm.formattedValue;
+						}
+						catch (error:Error) {}
+					};
+					where.forEach(myFunction, where);
+				}
 
 				if (!isNullOrEmpty(order))
 				{
 					sql += ' ORDER BY ';
-					var myFunction:Function = function(element:*, index:int, arr:Array):void
+					myFunction = function(element:*, index:int, arr:Array):void
 					{
 						try
 						{
 							var itm:OrderVO = element as OrderVO;
-							sql += itm.campo + ' ' + itm.ordem + ',';
+							sql += itm.formattedKey + ' ' + itm.order;
+							if (order.indexOf(itm) < order.length - 1)
+								sql += ',';
 						}
 						catch (error:Error) {}
 					};
-
 					order.forEach(myFunction, order);
-					sql = sql.substring(0, sql.lastIndexOf(','));
 				}
 
 				stmt.text = sql;
@@ -233,7 +258,7 @@ package controllers
 			try
 			{
 				var arrayFields:Array = [];
-				getFields(objectVO, arrayFields);
+				getFields(objectVO, arrayFields, null, null, null, true);
 
 				sql = 'SELECT ' + arrayFields.join(',') + ' FROM ' + tabela + ' WHERE id=:id';
 
@@ -382,12 +407,12 @@ package controllers
 		 * @return texto com a data formatada
 		 *
 		 */
-		public function getDateTime(formato:String = null, date:Date = null):String
+		public function getFormattedDateTime(formato:String = INPUT_FORMAT_DATA_HORA, date:Date = null):String
 		{
 			var df:DateFormatter = new DateFormatter;
 			var dt:Date = (date ? date : new Date);
 
-			df.formatString = (formato ? formato : 'DD/MM/YYYY HH:NN:SS');
+			df.formatString = formato;
 
 			return df.format(dt);
 		}
@@ -429,7 +454,7 @@ package controllers
 		 * @param stmt Parametros para o SQLite
 		 *
 		 */
-		public function getFields(entity:Object, arrayFields:Array = null, arrayParams:Array = null, arrayPairs:Array = null, stmt:SQLStatement = null):void
+		public function getFields(entity:Object, arrayFields:Array = null, arrayParams:Array = null, arrayPairs:Array = null, stmt:SQLStatement = null, isSelect:Boolean = false):void
 		{
 			var myFunction:Function = function(element:*, index:int, arr:Array):void
 			{
@@ -463,7 +488,8 @@ package controllers
 
 			var array:Array = ObjectUtil.getClassInfo(entity).properties;
 
-			removeItem(array, 'id');
+			if (!isSelect)
+				removeItem(array, 'id');
 			removeItem(array, 'prototype');
 
 			array.forEach(myFunction, this);
@@ -662,8 +688,18 @@ package controllers
 		 */
 		public function mostrarMensagem(mensagem:String, titulo:String = null):void
 		{
-			var stage:Stage = (this.root as DisplayObject).stage;
 			NativeAlert.show(mensagem, titulo);
+		}
+
+		/**
+		 * Dispara o evento para exibir uma mensagem para o usuario
+		 * @param mensagem Mensagem a ser exibida
+		 * @param titulo Titulo da mensagem (null = 'Atencao')
+		 *
+		 */
+		public function confirmarExclusao(mensagem:String, closeHandler:Function):void
+		{
+			NativeAlert.show(mensagem, 'Deseja realmente excluir este registro?', NativeAlert.YES | NativeAlert.NO, true, null, closeHandler);
 		}
 
 		/**

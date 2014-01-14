@@ -3,13 +3,21 @@ package valueObjects
 
 	public class OrderVO
 	{
-		public var campo:String;
-		public var ordem:String;
+		public var key:String;
+		public var order:String;
 
-		public function OrderVO(campo:String, ordem:String = 'ASC')
+		public function OrderVO(key:String, order:String = 'ASC')
 		{
-			this.campo = campo;
-			this.ordem = ordem;
+			this.key = key;
+			this.order = order;
+		}
+
+		public function get formattedKey():String
+		{
+			if (key.toLowerCase() == 'hora')
+				return 'strftime(\'%s\', ' + key + ')';
+
+			return key.toString();
 		}
 	}
 }
